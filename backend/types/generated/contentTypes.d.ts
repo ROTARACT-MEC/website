@@ -569,6 +569,8 @@ export interface ApiEventEvent extends Struct.CollectionTypeSchema {
     location: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     registrationLink: Schema.Attribute.String;
+    subscribersNotified: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     time: Schema.Attribute.String;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;

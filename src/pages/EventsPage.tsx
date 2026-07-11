@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { HiCalendar, HiChartBar, HiHeart, HiClock, HiLocationMarker } from 'react-icons/hi'
+import { subscriberService } from '@/services/subscriberService'
 import { FaTools, FaDollarSign } from 'react-icons/fa'
 import { GiMountainClimbing } from 'react-icons/gi'
 import PageHeader from '@/components/PageHeader'
@@ -21,6 +22,51 @@ const EventsPage = () => {
   const [pastEvents, setPastEvents] = useState<Event[]>([])
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming')
   const [loading, setLoading] = useState(true)
+
+  // Subscriber system states
+  const [subscriberEmail, setSubscriberEmail] = useState('')
+  const [submittingSubscriber, setSubmittingSubscriber] = useState(false)
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
+    show: false,
+    message: '',
+    type: 'success',
+  })
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ show: true, message, type })
+    setTimeout(() => {
+      setToast((prev) => ({ ...prev, show: false }))
+    }, 4000)
+  }
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!subscriberEmail) {
+      showToast('Please enter an email address.', 'error')
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(subscriberEmail)) {
+      showToast('Please enter a valid email address.', 'error')
+      return
+    }
+
+    setSubmittingSubscriber(true)
+    try {
+      const res = await subscriberService.subscribe(subscriberEmail)
+      if (res.success) {
+        showToast(res.message, 'success')
+        setSubscriberEmail('')
+      } else {
+        showToast(res.message, 'error')
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Subscription failed. Please try again.', 'error')
+    } finally {
+      setSubmittingSubscriber(false)
+    }
+  }
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -265,23 +311,64 @@ const EventsPage = () => {
           className="text-center py-12"
         >
           <h3 className="text-3xl md:text-4xl font-bold font-serif text-white mb-6">
-            Don't Miss Any Events
+            Stay Connected
           </h3>
           <p className="text-lg text-white/80 mb-8">
-            Subscribe to get updates on our latest events
+            Subscribe once to receive updates on our latest events, blogs, and club announcements.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
+          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-[14px] bg-white border border-gray-100 text-navy placeholder-textgray/60 focus:outline-none focus:border-cranberry"
+              value={subscriberEmail}
+              onChange={(e) => setSubscriberEmail(e.target.value)}
+              disabled={submittingSubscriber}
+              className="flex-1 px-4 py-3 rounded-[14px] bg-white border border-gray-100 text-navy placeholder-textgray/60 focus:outline-none focus:border-cranberry disabled:opacity-75"
             />
-            <button className="px-6 py-3 bg-cranberry text-white font-semibold rounded-[14px] hover:bg-cranberry/90 hover:shadow-premium smooth-transition">
-              Subscribe
+            <button
+              type="submit"
+              disabled={submittingSubscriber}
+              className="px-6 py-3 bg-cranberry text-white font-semibold rounded-[14px] hover:bg-cranberry/90 hover:shadow-premium smooth-transition disabled:opacity-75 flex items-center justify-center min-w-[120px]"
+            >
+              {submittingSubscriber ? (
+                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              ) : (
+                'Subscribe'
+              )}
             </button>
-          </div>
+          </form>
         </motion.div>
       </Section>
+
+      {/* Premium Toast Notification */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+            exit={{ opacity: 0, y: 20, scale: 0.9, x: '-50%' }}
+            className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-[14px] shadow-premium text-white font-medium ${
+              toast.type === 'success'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
+                : 'bg-gradient-to-r from-rose-500 to-cranberry'
+            }`}
+          >
+            {toast.type === 'success' ? (
+              <svg className="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            )}
+            <span className="whitespace-nowrap">{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

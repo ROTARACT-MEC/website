@@ -19,7 +19,7 @@ import {
 
 interface IntroductionData {
   title: string
-  vision: string
+  vision: string | string[]
   mission: string
   purpose: string
   history: string
@@ -127,9 +127,31 @@ const IntroductionPage = () => {
             className="glass-card p-8"
           >
             <h3 className="text-3xl font-bold text-gradient mb-4 font-serif">Vision</h3>
-            <p className="text-textgray text-lg leading-relaxed">
-              {data.vision}
-            </p>
+            <ul className="list-disc pl-5 space-y-2 text-textgray text-lg leading-relaxed">
+              {(() => {
+                const vision = data.vision;
+                if (Array.isArray(vision)) return vision;
+                if (!vision) return [];
+                
+                // Fallback / standard split for old paragraph
+                if (typeof vision === 'string' && (vision.includes('Empowering youth') || vision.length < 5)) {
+                  return [
+                    'Empower youth to become changemakers.',
+                    'Build inclusive and sustainable communities.',
+                    'Create lasting impact through service and leadership.'
+                  ];
+                }
+                
+                // Split by periods followed by space/end
+                return vision
+                  .split(/\.(?=\s|$)/)
+                  .map(s => s.trim())
+                  .filter(Boolean)
+                  .map(s => s.endsWith('.') ? s : `${s}.`);
+              })().map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
           </motion.div>
 
           <motion.div
@@ -204,7 +226,7 @@ const IntroductionPage = () => {
       </Section>
 
       {/* Core Values Section */}
-      <Section title="Our Core Values" id="values">
+      <Section title="The Rotaract Way" id="values">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {data.values.map((value, idx) => (
             <motion.div

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import PageHeader from '@/components/PageHeader'
 import { Section } from '@/components/Common'
@@ -6,6 +6,29 @@ import CardGrid, { CoordinatorCard } from '@/components/Cards'
 import { coordinatorService } from '@/services/coordinatorService'
 import { useSEO } from '@/hooks'
 import { Coordinator } from '@/types'
+
+// Centralized priority mapping for sorting team member roles (highest priority first)
+const rolePriority: Record<string, number> = {
+  "Charter President": 1,
+  "Immediate Past President": 2,
+  "Charter President Elect": 3,
+  "Charter Vice President": 4,
+  "Charter Secretary": 5,
+  "Charter Joint Secretary": 6,
+  "Charter Treasurer": 7,
+  "Club Service Chair": 8,
+  "Community Service Chair": 9,
+  "International Service Chair": 10,
+  "Professional Service Chair": 11,
+  "Web Service Chair": 12,
+  "Social Media Chair": 13,
+  "Membership Chair": 14,
+  "Club Editor": 15,
+  "Sergeant at Arms": 16,
+  "Director": 17,
+  "Member": 18,
+  "Volunteer": 19
+};
 
 const CoordinatorsPage = () => {
   useSEO({
@@ -30,6 +53,24 @@ const CoordinatorsPage = () => {
     }
     fetchCoordinators()
   }, [])
+
+  // Sort coordinators according to rolePriority immediately before rendering, 
+  // preserving their relative order for non-prioritized or equal-priority roles.
+  const sortedCoordinators = useMemo(() => {
+    return [...coordinators]
+      .map((item, index) => ({ item, index }))
+      .sort((a, b) => {
+        const priorityA = rolePriority[a.item.role] ?? Infinity
+        const priorityB = rolePriority[b.item.role] ?? Infinity
+
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB
+        }
+        // Fallback to preserve the original order of fetching
+        return a.index - b.index
+      })
+      .map(({ item }) => item)
+  }, [coordinators])
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -74,7 +115,7 @@ const CoordinatorsPage = () => {
             viewport={{ once: true }}
           >
             <CardGrid cols={3}>
-              {coordinators.map((coordinator) => (
+              {sortedCoordinators.map((coordinator) => (
                 <motion.div
                   key={coordinator.id}
                   variants={itemVariants}

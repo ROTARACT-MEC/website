@@ -40,6 +40,10 @@
     },
     "category": {
       "type": "string"
+    },
+    "subscribersNotified": {
+      "type": "boolean",
+      "default": false
     }
   }
 }
