@@ -209,7 +209,7 @@ const ActivitiesPage = () => {
             },
             {
               number: '3+',
-              label: 'Life Chaning Events',
+              label: 'Life Changing Events',
               icon: HiHeart,
             },
           ].map((stat, idx) => {

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import PageHeader from '@/components/PageHeader'
 import { Section } from '@/components/Common'
 import { useSEO } from '@/hooks'
-import { fetchStrapi, normalizeStrapiItem } from '@/services/strapi'
+import { introductions } from '@/data/introductions'
 import {
   FaHandHoldingHeart,
   FaBriefcase,
@@ -38,19 +38,10 @@ const IntroductionPage = () => {
   })
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetchStrapi('/api/introduction?populate=*')
-        if (response && response.data) {
-          setData(normalizeStrapiItem<IntroductionData>(response.data))
-        }
-      } catch (error) {
-        console.error('Error fetching introduction data from Strapi:', error)
-      } finally {
-        setLoading(false)
-      }
+    if (introductions && introductions.length > 0) {
+      setData(introductions[0] as IntroductionData)
     }
-    fetchData()
+    setLoading(false)
   }, [])
 
   if (loading) {

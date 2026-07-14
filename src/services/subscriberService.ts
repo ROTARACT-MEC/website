@@ -1,22 +1,18 @@
-import { fetchStrapi } from './strapi'
-
 export const subscriberService = {
   async subscribe(email: string): Promise<{ success: boolean; message: string }> {
     try {
-      await fetchStrapi('/api/subscribers', {
-        method: 'POST',
-        body: JSON.stringify({
-          data: {
-            email,
-          },
-        }),
-      })
+      // Mock saving subscriber to local storage for local offline capability
+      const subscribers = JSON.parse(localStorage.getItem('subscribers') || '[]');
+      if (!subscribers.includes(email)) {
+        subscribers.push(email);
+        localStorage.setItem('subscribers', JSON.stringify(subscribers));
+      }
       return { success: true, message: 'Thank you for subscribing to our blog!' }
     } catch (error: any) {
       console.error('Newsletter subscription error:', error)
       return {
         success: false,
-        message: error.message || 'An unexpected error occurred. Please try again.',
+        message: 'An unexpected error occurred. Please try again.',
       }
     }
   },

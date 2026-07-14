@@ -9,6 +9,7 @@ import { Coordinator } from '@/types'
 
 // Centralized priority mapping for sorting team member roles (highest priority first)
 const rolePriority: Record<string, number> = {
+  "Faculty incharge": 0,
   "Charter President": 1,
   "Immediate Past President": 2,
   "Charter President Elect": 3,
@@ -127,6 +128,8 @@ const CoordinatorsPage = () => {
                     description={coordinator.description}
                     image={coordinator.image}
                     social={coordinator.social}
+                    imageFit="cover"
+                    imagePosition={coordinator.name === 'Minu K K' ? 'center 15%' : undefined}
                   />
                 </motion.div>
               ))}

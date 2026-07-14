@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -12,12 +12,7 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application with Strapi build arguments
-ARG VITE_STRAPI_API_URL
-ARG VITE_STRAPI_TOKEN
-ENV VITE_STRAPI_API_URL=$VITE_STRAPI_API_URL
-ENV VITE_STRAPI_TOKEN=$VITE_STRAPI_TOKEN
-
+# Build the application
 RUN npm run build
 
 # Production stage

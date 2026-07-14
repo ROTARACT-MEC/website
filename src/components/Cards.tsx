@@ -56,7 +56,9 @@ export const CoordinatorCard: React.FC<{
   department?: string
   description?: string
   social?: { facebook?: string; instagram?: string; linkedin?: string }
-}> = ({ image, name, role, department, description, social }) => {
+  imageFit?: 'cover' | 'contain'
+  imagePosition?: string
+}> = ({ image, name, role, department, description, social, imageFit = 'cover', imagePosition }) => {
   const [imageSrc, setImageSrc] = useState(image || '/coordinators/default.png')
 
   const handleError = () => {
@@ -75,7 +77,8 @@ export const CoordinatorCard: React.FC<{
               src={imageSrc}
               alt={name}
               onError={handleError}
-              className="w-full h-full object-cover"
+              style={{ objectFit: imageFit, objectPosition: imagePosition }}
+              className="w-full h-full"
             />
           </motion.div>
           <h3 className="text-xl font-bold text-navy mb-1">{name}</h3>
@@ -94,6 +97,8 @@ export const CoordinatorCard: React.FC<{
                 href={social.facebook}
                 className="text-textgray hover:text-roseaccent smooth-transition hover:scale-110 transform flex items-center justify-center"
                 aria-label="Facebook"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <FaFacebook size={22} />
               </a>
@@ -103,6 +108,8 @@ export const CoordinatorCard: React.FC<{
                 href={social.instagram}
                 className="text-textgray hover:text-roseaccent smooth-transition hover:scale-110 transform flex items-center justify-center"
                 aria-label="Instagram"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <FaInstagram size={22} />
               </a>
@@ -112,6 +119,8 @@ export const CoordinatorCard: React.FC<{
                 href={social.linkedin}
                 className="text-textgray hover:text-roseaccent smooth-transition hover:scale-110 transform flex items-center justify-center"
                 aria-label="LinkedIn"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <FaLinkedin size={22} />
               </a>
